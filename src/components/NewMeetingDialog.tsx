@@ -1,5 +1,5 @@
 "use client";
-
+import Cookies from "js-cookie";
 import { useState } from "react";
 import {
   Dialog,
@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import axios from "axios";
 
 interface User {
   id: string;
@@ -31,7 +34,7 @@ interface NewMeetingDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onMeetingCreated: (newMeeting: NewMeeting) => void;
-  users: User[]; // Recebendo usuários como props
+  users: User[];
 }
 
 export function NewMeetingDialog({
@@ -47,11 +50,54 @@ export function NewMeetingDialog({
     attendees: [],
   });
 
+  const [error, setError] = useState<string>("");
+
   const handleNewMeeting = async () => {
-    // Aqui você pode fazer a lógica de criação da nova reunião, similar ao exemplo anterior
-    onMeetingCreated(newMeeting);
-    onClose();
-    resetForm();
+    setError("");
+    const cookieToken = Cookies.get("meeting-scheduling");
+
+    if (!newMeeting.title || !newMeeting.date || newMeeting.attendees.length === 0) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3333/meeting",
+        {
+          title: newMeeting.title,
+          date: newMeeting.date,
+          emails: newMeeting.attendees,
+          description: newMeeting.description,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${cookieToken}`,
+          },
+        }
+      );
+
+ 
+
+
+
+
+
+
+      
+      console.log(response.data);
+
+
+      onMeetingCreated(newMeeting);
+      onClose();
+      resetForm();
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        setError(err.response.data.message || "Failed to create meeting.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
+    }
   };
 
   const resetForm = () => {
@@ -133,6 +179,13 @@ export function NewMeetingDialog({
             </div>
           </div>
         </div>
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         <DialogFooter>
           <Button onClick={handleNewMeeting}>Create Meeting</Button>
         </DialogFooter>

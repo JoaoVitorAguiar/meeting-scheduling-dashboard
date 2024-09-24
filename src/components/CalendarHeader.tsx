@@ -21,10 +21,8 @@ export default function CalendarHeader({
     onSelectDate(day); // Chama a função ao clicar em um dia
   };
 
-  // Aqui você pode renderizar os dias da semana, se desejar
-  // Por exemplo, renderizar cada dia como um botão
   const daysInWeek = [];
-  for (let d = weekStart; d <= weekEnd; d.setDate(d.getDate() + 1)) {
+ for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
     daysInWeek.push(new Date(d)); // Adiciona cada dia à lista
   }
 
@@ -39,13 +37,7 @@ export default function CalendarHeader({
       <Button variant="outline" size="icon" onClick={onNextWeek}>
         <FiChevronRight />
       </Button>
-      <div className="flex space-x-2">
-        {daysInWeek.map((day) => (
-          <Button key={day.toString()} onClick={() => handleDayClick(day)}>
-            {format(day, "d")}
-          </Button>
-        ))}
-      </div>
+     
     </div>
   );
 }

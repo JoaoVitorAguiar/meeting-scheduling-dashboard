@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { format, parseISO, isSameDay, setHours, setMinutes } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,6 +23,7 @@ interface Meeting {
 interface DailyMeetingListProps {
   meetings: Meeting[];
   users: User[];
+  selectedDate: Date; // Recebe a selectedDate como prop
 }
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -30,14 +31,14 @@ const HOURS = Array.from({ length: 24 }, (_, i) => i);
 export default function DailyMeetingList({
   meetings = [],
   users = [],
+  selectedDate, // Aceita a selectedDate como prop
 }: DailyMeetingListProps) {
-  const initialDate = new Date();
-  const [selectedDate] = useState<Date>(initialDate);
-
+  
   const getMeetingsForDay = (day: Date) => {
     return meetings.filter((meeting) => isSameDay(parseISO(meeting.date), day));
   };
 
+  // Usa a selectedDate que vem do componente pai
   const dayMeetings = getMeetingsForDay(selectedDate);
 
   return (

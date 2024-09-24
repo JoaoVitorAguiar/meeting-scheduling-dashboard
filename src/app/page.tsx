@@ -17,6 +17,11 @@ import DayCell from "@/components/DayCell";
 import DailyMeetingList from "@/components/MeetingList";
 import { NewMeetingDialog } from "@/components/NewMeetingDialog";
 import { setupAPIClient } from "@/services/api";
+import { format } from "date-fns";
+
+import LogoutButton from "@/components/LogoutButton";
+
+import { enUS } from 'date-fns/locale'; 
 
 // Interfaces
 interface User {
@@ -74,8 +79,17 @@ export default function AdvancedCalendar() {
     fetchData();
   }, []); // Removido 'api' das dependências
 
-  const weekStart = startOfWeek(selectedDate);
-  const weekEnd = endOfWeek(selectedDate);
+
+  const weekStart = startOfWeek(selectedDate, { locale: enUS });
+
+  const weekEnd = endOfWeek(selectedDate, { locale: enUS, weekStartsOn: 0 }); // 0 para domingo ou 1 para segunda-feira
+
+
+
+
+
+
+  
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
   const handlePreviousWeek = () => {
@@ -109,6 +123,7 @@ export default function AdvancedCalendar() {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
+      <LogoutButton />
       {loading ? (
         <div>Loading...</div>
       ) : (
@@ -140,17 +155,21 @@ export default function AdvancedCalendar() {
             </CardContent>
           </Card>
 
-          <DailyMeetingList meetings={filteredMeetings} users={users} />
+          <DailyMeetingList meetings={filteredMeetings} users={users} selectedDate={selectedDate} />
 
           <Button onClick={() => setIsNewMeetingOpen(true)}>New Meeting</Button>
           <NewMeetingDialog
             isOpen={isNewMeetingOpen}
             onClose={() => setIsNewMeetingOpen(false)}
             onMeetingCreated={handleMeetingCreated}
-            users={users} // Passando usuários como props
+            users={users} 
           />
         </>
       )}
     </div>
   );
 }
+
+
+
+
