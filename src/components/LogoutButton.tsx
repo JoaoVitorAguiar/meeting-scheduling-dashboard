@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { Button } from "@/components/ui/button";
 
+
 export default function LogoutButton() {
   const router = useRouter();
 
@@ -17,8 +18,9 @@ export default function LogoutButton() {
   };
 
   return (
-    <Button onClick={handleLogout} variant="destructive">
-      Log-out
-    </Button>
+    <Button onClick={handleLogout} variant="destructive" className="rounded-lg hover:bg-red-600">
+  Log-out
+</Button>
+
   );
 }

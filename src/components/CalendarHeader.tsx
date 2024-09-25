@@ -7,7 +7,7 @@ interface CalendarHeaderProps {
   weekEnd: Date;
   onPreviousWeek: () => void;
   onNextWeek: () => void;
-  onSelectDate: (date: Date) => void; // Nova prop para seleção de data
+  onSelectDate: (date: Date) => void;
 }
 
 export default function CalendarHeader({
@@ -18,26 +18,25 @@ export default function CalendarHeader({
   onSelectDate,
 }: CalendarHeaderProps) {
   const handleDayClick = (day: Date) => {
-    onSelectDate(day); // Chama a função ao clicar em um dia
+    onSelectDate(day);
   };
 
   const daysInWeek = [];
- for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
-    daysInWeek.push(new Date(d)); // Adiciona cada dia à lista
+  for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+    daysInWeek.push(new Date(d));
   }
 
   return (
-    <div className="flex justify-between items-center mb-4">
-      <Button variant="outline" size="icon" onClick={onPreviousWeek}>
-        <FiChevronLeft />
+    <div className="flex justify-between items-center mb-1 bg-white shadow-sm p-0 rounded-sm"> {/* Ajuste de padding e margem */}
+      <Button variant="outline" size="icon" onClick={onPreviousWeek} className="hover:bg-blue-200 p-1"> {/* Botões menores */}
+        <FiChevronLeft size={12} /> {/* Ícones menores */}
       </Button>
-      <h2 className="text-lg font-semibold">
-        {format(weekStart, "MMMM d")} - {format(weekEnd, "MMMM d, yyyy")}
+      <h2 className="text-m font-medium text-brown-200"> {/* Título com fonte menor */}
+        {format(weekStart, "MMM d")} - {format(weekEnd, "MMM d, yyyy")}
       </h2>
-      <Button variant="outline" size="icon" onClick={onNextWeek}>
-        <FiChevronRight />
+      <Button variant="outline" size="icon" onClick={onNextWeek} className="hover:bg-blue-200 p-0">
+        <FiChevronRight size={12} /> {/* Ícone menor */}
       </Button>
-     
     </div>
   );
 }

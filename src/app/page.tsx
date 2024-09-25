@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import {
   startOfWeek,
@@ -10,18 +9,17 @@ import {
   parseISO,
   addDays,
 } from "date-fns";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CalendarHeader from "@/components/CalendarHeader";
 import DayCell from "@/components/DayCell";
 import DailyMeetingList from "@/components/MeetingList";
 import { NewMeetingDialog } from "@/components/NewMeetingDialog";
 import { setupAPIClient } from "@/services/api";
-import { format } from "date-fns";
-
-import LogoutButton from "@/components/LogoutButton";
-
+import Sidebar from "@/components/Sidebar"; 
 import { enUS } from 'date-fns/locale'; 
+
+import { FiCalendar } from "react-icons/fi";
+
 
 // Interfaces
 interface User {
@@ -34,7 +32,7 @@ interface Meeting {
   id: string;
   title: string;
   description?: string;
-  date: string; // ISO string
+  date: string;
   createdBy: string;
   attendees: string[];
 }
@@ -42,7 +40,7 @@ interface Meeting {
 interface NewMeeting {
   title: string;
   description?: string;
-  date: string; // ISO string
+  date: string;
   attendees: string[];
 }
 
@@ -51,7 +49,7 @@ export default function AdvancedCalendar() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [isNewMeetingOpen, setIsNewMeetingOpen] = useState(false);
-  const [loading, setLoading] = useState(true); // Estado para controlar requisições
+  const [loading, setLoading] = useState(true); 
   const api = setupAPIClient();
 
   useEffect(() => {
@@ -62,13 +60,10 @@ export default function AdvancedCalendar() {
           api.get("/meeting"),
           api.get("/users"),
         ]);
+       
+        setMeetings(meetingsResponse.data);
 
-        const currentDate = new Date();
-        const upcomingMeetings = meetingsResponse.data.filter(
-          (meeting: Meeting) => isAfter(parseISO(meeting.date), currentDate)
-        );
-        setMeetings(upcomingMeetings);
-        setUsers(usersResponse.data); // Armazena usuários
+        setUsers(usersResponse.data); 
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
       } finally {
@@ -77,19 +72,10 @@ export default function AdvancedCalendar() {
     };
 
     fetchData();
-  }, []); // Removido 'api' das dependências
-
+  }, []);
 
   const weekStart = startOfWeek(selectedDate, { locale: enUS });
-
-  const weekEnd = endOfWeek(selectedDate, { locale: enUS, weekStartsOn: 0 }); // 0 para domingo ou 1 para segunda-feira
-
-
-
-
-
-
-  
+  const weekEnd = endOfWeek(selectedDate, { locale: enUS, weekStartsOn: 0 });
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
   const handlePreviousWeek = () => {
@@ -104,10 +90,19 @@ export default function AdvancedCalendar() {
     setSelectedDate(day);
   };
 
+  // Validação ao criar evento
   const handleMeetingCreated = (newMeeting: NewMeeting) => {
+    const now = new Date();
+    const meetingDate = new Date(newMeeting.date);
+    
+    if (isAfter(now, meetingDate)) {
+      alert("Este horário/dia já passou. Escolha uma data e hora futura.");
+      return;
+    }
+    
     const meeting: Meeting = {
       id: generateId(),
-      createdBy: "currentUserId", // Substitua pelo ID do usuário atual
+      createdBy: "currentUserId",
       ...newMeeting,
     };
     setMeetings((prev) => [...prev, meeting]);
@@ -122,54 +117,55 @@ export default function AdvancedCalendar() {
   );
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <LogoutButton />
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <>
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">
-                Meeting Calendar
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CalendarHeader
-                weekStart={weekStart}
-                weekEnd={weekEnd}
-                onPreviousWeek={handlePreviousWeek}
-                onNextWeek={handleNextWeek}
-                onSelectDate={(date) => setSelectedDate(date)}
-              />
-              <div className="grid grid-cols-7 gap-4">
-                {weekDays.map((day) => (
-                  <DayCell
-                    key={day.toISOString()}
-                    day={day}
-                    isSelected={isSameDay(day, selectedDate)}
-                    onClick={handleDayClick}
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+    <div className="flex h-screen bg-blue-50">
+      <Sidebar onCreateMeeting={() => setIsNewMeetingOpen(true)} /> 
+      <div className="flex-1 p-1 max-w-6xl mx-auto">
+        {loading ? (
+          <div className="text-center text-lg text-gray-600">Loading...</div>
+        ) : (
+          <>
+            <Card className="mb-1 shadow-md bg-white rounded-lg ">
+            <CardHeader className="text-2xl font-bold text-center">
+            <CardTitle className="text-2xl font-bold text-center text-gray-400 flex items-center justify-center">
+             <FiCalendar className="mr-1" /> {/* Ajuste a margem conforme necessário */}
+             Meeting Calendar
+            </CardTitle>
+       </CardHeader>
 
-          <DailyMeetingList meetings={filteredMeetings} users={users} selectedDate={selectedDate} />
-
-          <Button onClick={() => setIsNewMeetingOpen(true)}>New Meeting</Button>
-          <NewMeetingDialog
-            isOpen={isNewMeetingOpen}
-            onClose={() => setIsNewMeetingOpen(false)}
-            onMeetingCreated={handleMeetingCreated}
-            users={users} 
-          />
-        </>
-      )}
+              <CardContent>
+                <CalendarHeader
+                  weekStart={weekStart}
+                  weekEnd={weekEnd}
+                  onPreviousWeek={handlePreviousWeek}
+                  onNextWeek={handleNextWeek}
+                  onSelectDate={(date) => setSelectedDate(date)}
+                />
+                <div className="grid grid-cols-7 gap-0">
+                  {weekDays.map((day) => (
+                    <DayCell
+                      key={day.toISOString()}
+                      day={day}
+                      isSelected={isSameDay(day, selectedDate)}
+                      onClick={handleDayClick}
+                    />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            <DailyMeetingList
+              meetings={filteredMeetings}
+              users={users}
+              selectedDate={selectedDate}
+            />
+            <NewMeetingDialog
+              isOpen={isNewMeetingOpen}
+              onClose={() => setIsNewMeetingOpen(false)}
+              onMeetingCreated={handleMeetingCreated}
+              users={users}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }
-
-
-
-

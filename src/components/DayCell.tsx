@@ -22,3 +22,4 @@ export default function DayCell({ day, isSelected, onClick }: DayCellProps) {
     </div>
   );
 }
+

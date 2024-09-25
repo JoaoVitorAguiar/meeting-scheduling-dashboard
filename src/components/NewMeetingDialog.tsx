@@ -53,15 +53,26 @@ export function NewMeetingDialog({
   const [error, setError] = useState<string>("");
 
   const handleNewMeeting = async () => {
-    setError("");
+    setError(""); // Limpa qualquer erro anterior
+  
     const cookieToken = Cookies.get("meeting-scheduling");
-
+    const now = new Date(); // Data e hora atuais
+    const meetingDate = new Date(newMeeting.date); // Data/hora do evento
+  
+    // Verifica se todos os campos obrigatórios estão preenchidos
     if (!newMeeting.title || !newMeeting.date || newMeeting.attendees.length === 0) {
       setError("Please fill in all fields");
       return;
     }
-
+  
+    // Verifica se a data/hora do evento é anterior à data/hora atual
+    if (meetingDate <= now) {
+      setError("Cannot create a meeting in the past. Please select a future date and time.");
+      return;
+    }
+  
     try {
+      // Faz a requisição POST para o backend
       const response = await axios.post(
         "http://localhost:3333/meeting",
         {
@@ -76,18 +87,10 @@ export function NewMeetingDialog({
           },
         }
       );
-
- 
-
-
-
-
-
-
       
       console.log(response.data);
-
-
+  
+      // Atualiza o estado de reuniões e fecha o diálogo
       onMeetingCreated(newMeeting);
       onClose();
       resetForm();
@@ -99,6 +102,7 @@ export function NewMeetingDialog({
       }
     }
   };
+  
 
   const resetForm = () => {
     setNewMeeting({
@@ -113,7 +117,7 @@ export function NewMeetingDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Meeting</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-center">Create New Meeting</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
