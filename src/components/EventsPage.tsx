@@ -1,3 +1,4 @@
+// components/EventsPage.tsx
 "use client";
 import { useEffect, useState } from "react";
 import {
@@ -14,14 +15,15 @@ import CalendarHeader from "@/components/CalendarHeader";
 import DayCell from "@/components/DayCell";
 import DailyMeetingList from "@/components/MeetingList";
 import { NewMeetingDialog } from "@/components/NewMeetingDialog";
-import { setupAPIClient } from "@/services/api";
 import Sidebar from "@/components/Sidebar"; 
 import { enUS } from 'date-fns/locale'; 
-
 import { FiCalendar } from "react-icons/fi";
+import { setupAPIClient } from "@/services/api";
 
+interface EventsPageProps {
+  apiEndpoint: string;  // Endpoint dinâmico a ser passado
+}
 
-// Interfaces
 interface User {
   id: string;
   email: string;
@@ -44,12 +46,12 @@ interface NewMeeting {
   attendees: string[];
 }
 
-export default function AdvancedCalendar() {
+export default function EventsPage({ apiEndpoint }: EventsPageProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [isNewMeetingOpen, setIsNewMeetingOpen] = useState(false);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const api = setupAPIClient();
 
   useEffect(() => {
@@ -57,13 +59,12 @@ export default function AdvancedCalendar() {
       try {
         setLoading(true);
         const [meetingsResponse, usersResponse] = await Promise.all([
-          api.get("/meeting"),
+          api.get(apiEndpoint),  // Faz a chamada ao endpoint dinâmico
           api.get("/users"),
         ]);
-       
-        setMeetings(meetingsResponse.data);
 
-        setUsers(usersResponse.data); 
+        setMeetings(meetingsResponse.data);
+        setUsers(usersResponse.data);
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
       } finally {
@@ -72,7 +73,7 @@ export default function AdvancedCalendar() {
     };
 
     fetchData();
-  }, []);
+  }, [apiEndpoint]);  
 
   const weekStart = startOfWeek(selectedDate, { locale: enUS });
   const weekEnd = endOfWeek(selectedDate, { locale: enUS, weekStartsOn: 0 });
@@ -90,8 +91,14 @@ export default function AdvancedCalendar() {
     setSelectedDate(day);
   };
 
-  // Validação ao criar evento
   const handleMeetingCreated = (newMeeting: NewMeeting) => {
+    const now = new Date();
+    const meetingDate = new Date(newMeeting.date);
+    
+    if (isAfter(now, meetingDate)) {
+      alert("Este horário/dia já passou. Escolha uma data e hora futura.");
+      return;
+    }
     
     const meeting: Meeting = {
       id: generateId(),
@@ -111,19 +118,19 @@ export default function AdvancedCalendar() {
 
   return (
     <div className="flex h-screen bg-blue-50">
-      <Sidebar onCreateMeeting={() => setIsNewMeetingOpen(true)} /> 
+      <Sidebar onCreateMeeting={() => setIsNewMeetingOpen(true)} />
       <div className="flex-1 p-1 max-w-6xl mx-auto">
         {loading ? (
           <div className="text-center text-lg text-gray-600">Loading...</div>
         ) : (
           <>
-            <Card className="mb-1 shadow-md bg-white rounded-lg ">
-            <CardHeader className="text-2xl font-bold text-center">
-            <CardTitle className="text-2xl font-bold text-center text-gray-400 flex items-center justify-center">
-             <FiCalendar className="mr-1" /> {/* Ajuste a margem conforme necessário */}
-             Meeting Calendar
-            </CardTitle>
-       </CardHeader>
+            <Card className="mb-1 shadow-md bg-white rounded-lg">
+              <CardHeader className="text-2xl font-bold text-center">
+                <CardTitle className="text-2xl font-bold text-center text-gray-400 flex items-center justify-center">
+                  <FiCalendar className="mr-1" />
+                  Meeting Calendar
+                </CardTitle>
+              </CardHeader>
 
               <CardContent>
                 <CalendarHeader

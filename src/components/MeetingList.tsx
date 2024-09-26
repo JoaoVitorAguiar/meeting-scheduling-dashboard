@@ -33,8 +33,6 @@ export default function DailyMeetingList({
   users = [],
   selectedDate,
 }: DailyMeetingListProps) {
-
-  // Mantemos todos os meetings, sem qualquer filtro por data
   const dayMeetings = meetings;
 
   return (
@@ -56,14 +54,14 @@ export default function DailyMeetingList({
                   hourMeetings.map((meeting) => (
                     <div
                       key={meeting.id}
-                      className="shadow-md rounded-lg p-3 mb-2 hover:shadow-lg transition-shadow duration-200 bg-white"
+                      className="shadow-md rounded-lg p-3 mb-2 hover:shadow-lg transition-shadow duration-200 bg-gray-100 hover:bg-gray-200"
                     >
-                      <h4 className="font-medium">{meeting.title}</h4>
-                      <span className="text-sm text-muted-foreground">
+                      <h4 className="font-medium text-blue-900">{meeting.title}</h4>
+                      <span className="text-sm text-gray-600">
                         {format(parseISO(meeting.date), "h:mm a")}
                       </span>
                       {meeting.description && (
-                        <p className="text-sm mt-1 text-muted-foreground">
+                        <p className="text-sm mt-1 text-gray-600">
                           {meeting.description}
                         </p>
                       )}
@@ -80,9 +78,9 @@ export default function DailyMeetingList({
                     </div>
                   ))
                 ) : (
-                  <div className="bg-gray-100 rounded-lg p-2 mb-2">
-                    <span className="text-sm text-muted-foreground">
-                      Nenhum evento para este horário.
+                  <div className="bg-gray-200 rounded-lg p-2 mb-2">
+                    <span className="text-sm text-gray-500">
+                      
                     </span>
                   </div>
                 )}
